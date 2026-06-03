@@ -11,37 +11,60 @@ USERNAME = os.getenv("USERNAME")
 headers = {"X-USER-TOKEN": TOKEN}
 pixela_endpoint = "https://pixe.la/v1/users"
 
-# Create user
-user_body = {
-    "token": TOKEN,
-    "username": USERNAME,
-    "agreeTermsOfService": "yes",
-    "notMinor": "yes"
-}
-#requests.post(url=pixela_endpoint, json=user_body)
+def create_user(token, username):
+    """Create a user if not exists"""
+    body = {
+        "token": token,
+        "username": username,
+        "agreeTermsOfService": "yes",
+        "notMinor": "yes"
+    }
+    requests.post(url=pixela_endpoint, json=body)
+def create_graph(username, graph_id, graph_name, graph_unit, graph_type, graph_color):
+    """Create a graph if not exists"""
+    endpoint = f"{pixela_endpoint}/{username}/graphs"
+    body = {
+        "id": graph_id,
+        "name": graph_name,
+        "unit": graph_unit,
+        "type": graph_type,
+        "color": graph_color
+    }
+    requests.post(url=endpoint, json=body, headers=headers)
+def update_pixel(username, graph_id, date):
+    """Update pixel"""
+    endpoint = f"{pixela_endpoint}/{username}/graphs/{graph_id}/{date}"
+    quantity = input("How many liters did you drink today? (float)")
+    body = {
+        "quantity": quantity
+    }
+    requests.put(url=endpoint, json=body, headers=headers)
+def delete_pixel(username, graph_id, date):
+    """Delete pixel"""
+    endpoint = f"{pixela_endpoint}/{username}/graphs/{graph_id}/{date}"
+    print("Deleting today's pixel...")
+    requests.delete(url=endpoint, headers=headers)
 
-# Create graph
-graph_endpoint = f"{pixela_endpoint}/{user_body['username']}/graphs"
-graph_body = {
-    "id": "daily-water",
-    "name": "Daily Hydration",
-    "unit": "L",
-    "type": "float",
-    "color": "ajisai"
-}
-#requests.post(url=graph_endpoint, json=graph_body, headers=headers)
+#create_user(TOKEN, USERNAME)
+#create_graph(TOKEN, USERNAME, "daily-water", "Daily Hydration", "L", "float", "ajisai")
 
-# Add pixel
-pixel_endpoint = f"{graph_endpoint}/daily-water"
-add_pixel_body = {
-    "date": datetime.datetime.now().strftime("%Y%m%d"),
-    "quantity": "1.5"
-}
-#requests.post(url=pixel_endpoint, json=add_pixel_body, headers=headers)
+date = datetime.datetime.now().strftime("%Y%m%d")
+while True:
+    print("Choose an option: ")
+    print("1. Create/Update today's pixel")
+    print("2. Delete today's pixel")
+    print("3. Exit")
+    choice = input("Enter your choice: ")
 
-# Update pixel
-update_pixel_endpoint = f"{pixel_endpoint}/{add_pixel_body['date']}"
-update_pixel_body = {
-    "quantity": "1.0"
-}
-#requests.put(url=update_pixel_endpoint, json=update_pixel_body, headers=headers)
+    if choice == "1":
+        update_pixel(USERNAME, "daily-water", date) # Update pixel
+
+    elif choice == "2":
+        delete_pixel(USERNAME, "daily-water", date) # Delete pixel
+
+    elif choice == "3":
+        print("Exiting...")
+        break
+
+    else:
+        print("Invalid choice. Please try again.")
