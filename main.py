@@ -27,3 +27,4 @@ headers = {"X-USER-TOKEN": TOKEN}
 
 response = requests.post(graph_endpoint, json=graph_param, headers=headers)
 print(response.text)
+# open url f"https://pixe.la/v1/users/{USERNAME}/graphs/daily-water"
